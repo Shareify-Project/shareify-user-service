@@ -7,6 +7,7 @@ imagePullSecrets:
   - name: ghcr-secret
 env:
   databasePath: "/app/data/user.db"
+  jwtSecret: "change-me-secret-key"
 service:
   type: ClusterIP
   port: 80
