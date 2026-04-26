@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: ghcr.io/shareify-project/shareify-user-service
   pullPolicy: IfNotPresent
-  tag: "v1.1.1"
+  tag: latest
 service:
   type: ClusterIP
   port: 8000
@@ -22,3 +22,4 @@ persistence:
 env:
   jwtSecret: "shareify-secret-key-2024"
   databasePath: "/data/users.db"
+
