@@ -23,7 +23,7 @@ app = FastAPI(title="Shareify User Service", version="1.0.0")
 SECRET_KEY = os.getenv("JWT_SECRET", "shareify-secret-key-2024")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_MINUTES = int(os.getenv("TOKEN_EXPIRE_MINUTES", "60"))
-DATABASE = os.getenv("DATABASE_PATH", "./data/users.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:shareify-secure-db-pass@postgres-db:5432/user_service")
 
 pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 security = HTTPBearer()
@@ -168,4 +168,5 @@ def get_user(user_id: str):
 @app.get("/health")
 def health():
     return {"status": "healthy", "service": "shareify-user-service"}
+
 
