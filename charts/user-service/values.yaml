@@ -10,7 +10,7 @@ env:
   jwtSecret: "change-me-secret-key"
 service:
   type: ClusterIP
-  port: 8000
+  port: 800000
 persistence:
   enabled: true
   storageClass: "nfs-client"
@@ -26,5 +26,6 @@ resources:
 
 config: {}
 secrets: {}
+
 
 
