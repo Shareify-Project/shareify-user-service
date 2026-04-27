@@ -18,6 +18,11 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.existingConfigMap | default (printf "%s-%s-config" .Release.Name .Chart.Name) }}
+            - secretRef:
+                name: {{ .Values.existingSecret | default (printf "%s-%s-secret" .Release.Name .Chart.Name) }}
           ports:
             - containerPort: {{ .Values.service.port }}
           volumeMounts:
