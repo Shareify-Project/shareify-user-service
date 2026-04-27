@@ -18,6 +18,19 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
           envFrom:
             - configMapRef:
                 name: {{ .Values.existingConfigMap | default (printf "%s-%s-config" .Release.Name .Chart.Name) }}
@@ -25,6 +38,19 @@ spec:
                 name: {{ .Values.existingSecret | default (printf "%s-%s-secret" .Release.Name .Chart.Name) }}
                     ports:
             - containerPort: {{ .Values.service.port }}
+          
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-{{ .Chart.Name }}-config
@@ -52,5 +78,6 @@ spec:
     - port: {{ .Values.service.port }}
   selector:
     app: {{ .Chart.Name }}
+
 
 
