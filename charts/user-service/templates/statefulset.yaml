@@ -23,8 +23,13 @@ spec:
                 name: {{ .Values.existingConfigMap | default (printf "%s-%s-config" .Release.Name .Chart.Name) }}
             - secretRef:
                 name: {{ .Values.existingSecret | default (printf "%s-%s-secret" .Release.Name .Chart.Name) }}
-          ports:
+                    ports:
             - containerPort: {{ .Values.service.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-{{ .Chart.Name }}-config
+            - secretRef:
+                name: {{ .Release.Name }}-{{ .Chart.Name }}-secret
           volumeMounts:
             - name: data
               mountPath: {{ .Values.persistence.mountPath }}
@@ -47,4 +52,5 @@ spec:
     - port: {{ .Values.service.port }}
   selector:
     app: {{ .Chart.Name }}
+
 
