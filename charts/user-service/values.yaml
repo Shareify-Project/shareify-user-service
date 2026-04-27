@@ -6,7 +6,7 @@ image:
 imagePullSecrets:
   - name: ghcr-secret
 env:
-  databasePath: "/app/data/user.db"
+  databaseUrl: "postgresql://postgres:shareify-secure-db-pass@postgres-db:5432/user_service"
   jwtSecret: "change-me-secret-key"
 service:
   type: ClusterIP
@@ -26,6 +26,7 @@ resources:
 
 config: {}
 secrets: {}
+
 
 
 
