@@ -18,19 +18,17 @@ from passlib.context import CryptContext
 import jwt
 
 app = FastAPI(title="Shareify User Service", version="1.0.0")
-# -- POSTGRESQL HOTFIX: SQLite Polyfill --------------------------------------
-# Automatically translates SQLite conn.execute() and '?' to PostgreSQL syntax
+# --
+# -- POSTGRESQL HOTFIX: SQLite Polyfill Helper -------------------------------
 import psycopg2
-from psycopg2.extensions import connection
+from psycopg2.extras import RealDictCursor
 
-def _sqlite_to_psycopg2_execute(self, query, vars=None):
+def db_execute(conn, query, vars=None):
     if '?' in query:
         query = query.replace('?', '%s')
-    cursor = self.cursor()
+    cursor = conn.cursor()
     cursor.execute(query, vars)
     return cursor
-
-connection.execute = _sqlite_to_psycopg2_execute
 # ----------------------------------------------------------------------------
 import time
 from fastapi import Request
@@ -78,7 +76,7 @@ def get_db():
 
 def init_db():
     conn = get_db()
-    conn.execute("""
+    db_execute(conn, """
         CREATE TABLE IF NOT EXISTS users (
             user_id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -135,7 +133,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 def register(user: UserRegister):
     conn = get_db()
     try:
-        existing = conn.execute(
+        existing = db_execute(conn, 
             "SELECT 1 FROM users WHERE email = ?", (user.email,)
         ).fetchone()
         if existing:
@@ -143,7 +141,7 @@ def register(user: UserRegister):
 
         user_id = str(uuid.uuid4())
         password_hash = pwd_context.hash(user.password)
-        conn.execute(
+        db_execute(conn, 
             "INSERT INTO users (user_id, name, email, password_hash, created_at) "
             "VALUES (?, ?, ?, ?, ?)",
             (user_id, user.name, user.email, password_hash,
@@ -159,7 +157,7 @@ def register(user: UserRegister):
 def login(user: UserLogin):
     conn = get_db()
     try:
-        row = conn.execute(
+        row = db_execute(conn, 
             "SELECT * FROM users WHERE email = ?", (user.email,)
         ).fetchone()
         if not row or not pwd_context.verify(user.password, row["password_hash"]):
@@ -179,7 +177,7 @@ def login(user: UserLogin):
 def get_profile(payload: dict = Depends(verify_token)):
     conn = get_db()
     try:
-        row = conn.execute(
+        row = db_execute(conn, 
             "SELECT user_id, name, email, created_at FROM users WHERE user_id = ?",
             (payload["user_id"],),
         ).fetchone()
@@ -195,7 +193,7 @@ def get_user(user_id: str):
     """Inter-service endpoint – no auth required."""
     conn = get_db()
     try:
-        row = conn.execute(
+        row = db_execute(conn, 
             "SELECT user_id, name, email, created_at FROM users WHERE user_id = ?",
             (user_id,),
         ).fetchone()
@@ -209,6 +207,7 @@ def get_user(user_id: str):
 @app.get("/health")
 def health():
     return {"status": "healthy", "service": "shareify-user-service"}
+
 
 
 
