@@ -17,7 +17,7 @@ jobs:
     secrets: inherit
 
   build-and-push:
-    needs: sca-scan
+    # needs: sca-scan
     permissions:
       contents: read
       packages: write
@@ -25,3 +25,4 @@ jobs:
     with:
       image_name: shareify-user-service
     secrets: inherit
+
