@@ -18,6 +18,20 @@ from passlib.context import CryptContext
 import jwt
 
 app = FastAPI(title="Shareify User Service", version="1.0.0")
+# -- POSTGRESQL HOTFIX: SQLite Polyfill --------------------------------------
+# Automatically translates SQLite conn.execute() and '?' to PostgreSQL syntax
+import psycopg2
+from psycopg2.extensions import connection
+
+def _sqlite_to_psycopg2_execute(self, query, vars=None):
+    if '?' in query:
+        query = query.replace('?', '%s')
+    cursor = self.cursor()
+    cursor.execute(query, vars)
+    return cursor
+
+connection.execute = _sqlite_to_psycopg2_execute
+# ----------------------------------------------------------------------------
 import time
 from fastapi import Request
 from prometheus_client import make_asgi_app, Counter, Histogram
@@ -195,6 +209,7 @@ def get_user(user_id: str):
 @app.get("/health")
 def health():
     return {"status": "healthy", "service": "shareify-user-service"}
+
 
 
 
